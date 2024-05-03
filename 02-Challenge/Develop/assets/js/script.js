@@ -15,47 +15,46 @@ function generateTaskId() {
     }
 
 // Todo: create a function to create a task card
-function createTaskCard(task) {
-    const cardClass =  (() => {
-    if (task.dueDate && task.status !== 'done') {
-        const now = dayjs();
-        const due = dayjs(task.dueDate, "MM/DD/YYYY");
-        
-        if (due.isBefore(now, "day")) {
-            return "task-late"; // If overdue
-        }
-        if (due.diff(now, "day") <= 5) {
-            return "task-today"; 
-        }
-    }
-        return "task-card"; // Default class
-    })();
-    
+function createTaskCard(newTask) {
     const card = $('<div>')
-    .addClass('card task-card')
-    .attr('data-project-id', task.id)
+    .addClass('card')
+    .attr('data-project-id', newTask.id)
     .attr('draggable', 'true'); 
-
 
 const cardBody = $('<div>').addClass('card-body');
 
-const cardTitle = $('<h5>').addClass('card-title').text(task.title);
+const cardTitle = $('<h5>').addClass('card-title').text(newTask.title);
 cardBody.append(cardTitle);
 
-const cardDescription = $('<p>').addClass('card-text').text(task.description);
+const cardDescription = $('<p>').addClass('card-text').text(newTask.description);
 cardBody.append(cardDescription);
 
-const cardDueDate = $('<label>').text(task.dueDate);
+const cardDueDate = $('<p>').text(newTask.dueDate);
 cardBody.append(cardDueDate);
 
 const cardDeleteBtn = $('<button>')
     .addClass('btn btn-danger btn-delete-task')
     .text('Delete');
 cardBody.append(cardDeleteBtn);
-    
+
 card.append(cardBody);
-    return card; 
-}
+if (newTask.dueDate && newTask.status !== 'done') {
+    const now = dayjs();
+    const due = dayjs(newTask.dueDate, "MM/DD/YYYY");
+    
+    if (due.isBefore(now, "day")) {
+        card.addClass("task-late"); 
+    }
+    else if (due.diff(now, "day") <= 5) {
+        card.addClass("task-today"); 
+    }
+    else {
+    card.addClass("task-card");
+    }
+} 
+return card;
+};
+
 // Todo: create a function to render the task list and make cards draggable
 function renderTaskList() {
     const taskList = JSON.parse(localStorage.getItem("tasks")) || [];
@@ -92,7 +91,7 @@ function renderTaskList() {
       drop: handleDrop, 
     });
   }
-
+$('#addTaskBtn').on('click', handleAddTask)
 // Todo: create a function to handle adding a new task
 function handleAddTask(event){ 
         const title = $('#task-title').val();
